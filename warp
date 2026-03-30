@@ -1,0 +1,114 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+-- GUI
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "MiniTP"
+
+-- ปุ่มเปิด
+local toggle = Instance.new("TextButton", gui)
+toggle.Size = UDim2.new(0, 50, 0, 25)
+toggle.Position = UDim2.new(0, 10, 0.5, -12)
+toggle.Text = "TP"
+toggle.BackgroundColor3 = Color3.fromRGB(70,70,70)
+toggle.TextColor3 = Color3.new(1,1,1)
+
+-- หน้าต่างเล็ก
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 180, 0, 220) -- 🔥 เล็ก
+frame.Position = UDim2.new(0.2, 0, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(50,50,50)
+frame.Visible = true
+
+Instance.new("UICorner", frame)
+
+-- Title (ลากได้)
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Text = "TP Player"
+title.BackgroundColor3 = Color3.fromRGB(90,90,90)
+title.TextColor3 = Color3.new(1,1,1)
+
+-- ปุ่ม X
+local close = Instance.new("TextButton", frame)
+close.Size = UDim2.new(0, 25, 0, 25)
+close.Position = UDim2.new(1, -28, 0, 2)
+close.Text = "X"
+close.BackgroundColor3 = Color3.fromRGB(150,50,50)
+close.TextColor3 = Color3.new(1,1,1)
+
+-- รายชื่อ
+local scroll = Instance.new("ScrollingFrame", frame)
+scroll.Size = UDim2.new(1, 0, 1, -30)
+scroll.Position = UDim2.new(0, 0, 0, 30)
+scroll.CanvasSize = UDim2.new(0,0,0,0)
+scroll.ScrollBarThickness = 4
+scroll.BackgroundTransparency = 1
+
+local layout = Instance.new("UIListLayout", scroll)
+
+-- โหลดผู้เล่น
+local function refresh()
+	for _, v in pairs(scroll:GetChildren()) do
+		if v:IsA("TextButton") then v:Destroy() end
+	end
+
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= player then
+			local btn = Instance.new("TextButton", scroll)
+			btn.Size = UDim2.new(1, -5, 0, 25)
+			btn.Text = plr.Name
+			btn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+			btn.TextColor3 = Color3.new(1,1,1)
+
+			btn.MouseButton1Click:Connect(function()
+				if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+					player.Character:MoveTo(plr.Character.HumanoidRootPart.Position)
+				end
+			end)
+		end
+	end
+
+	scroll.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y)
+end
+
+refresh()
+Players.PlayerAdded:Connect(refresh)
+Players.PlayerRemoving:Connect(refresh)
+
+-- ลาก GUI
+local dragging, dragStart, startPos
+title.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+-- ปุ่มเปิด/ปิด
+toggle.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
+end)
+
+close.MouseButton1Click:Connect(function()
+	frame.Visible = false
+end)

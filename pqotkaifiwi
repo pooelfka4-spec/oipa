@@ -1,0 +1,127 @@
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "SpeedGUI"
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- 🔘 ปุ่มเปิด/ปิด (โลโก้)
+local toggle = Instance.new("TextButton", gui)
+toggle.Size = UDim2.new(0, 50, 0, 50)
+toggle.Position = UDim2.new(0, 20, 0.5, -25)
+toggle.Text = "⚡"
+toggle.BackgroundColor3 = Color3.fromRGB(80,60,200)
+toggle.TextColor3 = Color3.new(1,1,1)
+toggle.Font = Enum.Font.GothamBold
+toggle.TextSize = 18
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
+
+-- 🎛 Frame หลัก
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 260, 0, 180)
+frame.Position = UDim2.new(0.5, -130, 0.5, -90)
+frame.BackgroundColor3 = Color3.fromRGB(20,20,30)
+frame.Active = true
+frame.Draggable = true
+frame.Visible = true
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
+
+local stroke = Instance.new("UIStroke", frame)
+stroke.Color = Color3.fromRGB(100,80,255)
+stroke.Thickness = 1.5
+
+-- ❌ ปุ่มปิดใน GUI
+local close = Instance.new("TextButton", frame)
+close.Size = UDim2.new(0, 30, 0, 30)
+close.Position = UDim2.new(1, -35, 0, 5)
+close.Text = "X"
+close.BackgroundColor3 = Color3.fromRGB(150,50,50)
+close.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", close).CornerRadius = UDim.new(0,8)
+
+-- Title
+local title = Instance.new("TextLabel", frame)
+title.Text = "⚡ Speed Controller"
+title.Size = UDim2.new(1,0,0,40)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(200,200,255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+
+-- Speed Box
+local box = Instance.new("TextBox", frame)
+box.Size = UDim2.new(1, -20, 0, 40)
+box.Position = UDim2.new(0,10,0,50)
+box.PlaceholderText = "ใส่ความเร็ว (16 = ปกติ)"
+box.Text = ""
+box.BackgroundColor3 = Color3.fromRGB(30,30,45)
+box.TextColor3 = Color3.fromRGB(255,255,255)
+box.Font = Enum.Font.Code
+box.TextSize = 14
+Instance.new("UICorner", box).CornerRadius = UDim.new(0,8)
+
+-- Status
+local status = Instance.new("TextLabel", frame)
+status.Size = UDim2.new(1, -20, 0, 20)
+status.Position = UDim2.new(0,10,0,95)
+status.BackgroundTransparency = 1
+status.Text = "Speed: 16"
+status.TextColor3 = Color3.fromRGB(150,150,200)
+status.Font = Enum.Font.Gotham
+status.TextSize = 12
+status.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Apply Button
+local apply = Instance.new("TextButton", frame)
+apply.Size = UDim2.new(0.45, 0, 0, 40)
+apply.Position = UDim2.new(0.05, 0, 0, 120)
+apply.Text = "Apply"
+apply.BackgroundColor3 = Color3.fromRGB(80,60,200)
+apply.TextColor3 = Color3.new(1,1,1)
+apply.Font = Enum.Font.GothamBold
+Instance.new("UICorner", apply).CornerRadius = UDim.new(0,8)
+
+-- Reset Button
+local reset = Instance.new("TextButton", frame)
+reset.Size = UDim2.new(0.45, 0, 0, 40)
+reset.Position = UDim2.new(0.5, 0, 0, 120)
+reset.Text = "Reset"
+reset.BackgroundColor3 = Color3.fromRGB(150,50,50)
+reset.TextColor3 = Color3.new(1,1,1)
+reset.Font = Enum.Font.GothamBold
+Instance.new("UICorner", reset).CornerRadius = UDim.new(0,8)
+
+-- Logic
+local function setSpeed(val)
+	humanoid.WalkSpeed = val
+	status.Text = "Speed: "..val
+end
+
+apply.MouseButton1Click:Connect(function()
+	local num = tonumber(box.Text)
+	if num then
+		setSpeed(num)
+	end
+end)
+
+reset.MouseButton1Click:Connect(function()
+	setSpeed(16)
+end)
+
+-- 🔁 Toggle เปิด/ปิด
+toggle.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
+end)
+
+close.MouseButton1Click:Connect(function()
+	frame.Visible = false
+end)
+
+-- ป้องกันตายแล้วค่ารี
+player.CharacterAdded:Connect(function(c)
+	char = c
+	humanoid = c:WaitForChild("Humanoid")
+	setSpeed(16)
+end)
